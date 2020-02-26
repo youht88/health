@@ -1,0 +1,26 @@
+{
+  "appenders" : 
+    { "photo": { 
+        "type": "file",
+        "filename": "logs/photo.log" ,
+        "maxLogSize": 2000000 ,
+        "layout" : {
+          "type":"pattern",
+          "pattern": "%[[%d] [%p] [%c]%] %m"
+        }
+      } ,
+      "console":{
+        "type": "console",
+        "layout" : {
+          "type":"pattern",
+          "pattern": "%[%d-%p-%c:%m%]"
+        }
+      }
+    },
+  "categories": { 
+      "default": { 
+        "appenders": ["photo","console"], 
+        "level": "trace"
+        }
+  } 
+}

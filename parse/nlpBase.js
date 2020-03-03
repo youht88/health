@@ -46,7 +46,7 @@ class Base{
       return moment().format("HH:mm:SS")
     }else{
       //return this.nowE8(datetime.getTime()-28800000,"HH:mm:SS")
-      return moment(datetime.getTime()-28800000).format("HH:mm:SS")
+      return moment(datetime.getTime()-28800000).format("HH:mm:ss")
     }
   }  
   //同名字串实体转为数组

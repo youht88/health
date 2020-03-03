@@ -21,8 +21,8 @@ var http = require("http")
 var httpServer = http.createServer(app)
 //var httpsServer = https.createServer(cerd,app) 
 
-httpServer.listen(6000,function(){
-  console.log("httpServer listen on 6000")
+httpServer.listen(6001,function(){
+  console.log("httpServer listen on 6001")
 })
 //httpsServer.listen(6001,function(){
 //  console.log("httpsServer listen on 6001")
@@ -407,14 +407,14 @@ app.get("/moment/parse/:text",(req,res)=>{
   text = text.replace(new RegExp("[ ，。]","g"),"")
   let date = nlpMoment.parseDuration(text)
   //let date = nlpMoment.parse(text)
-  //res.json(date?nlpMoment.nowE8(date,"YYYY/MM/DD HH:mm:SS"):null)
+  //res.json(date?nlpMoment.nowE8(date,"YYYY/MM/DD HH:mm:ss"):null)
   if (!date[0] && !date[1]){
-    fs.appendFileSync("error.txt",nlpMoment.nowE8("YYYY-MM-DD HH:mm:SS")+"|"+text+"|\n")
+    fs.appendFileSync("error.txt",nlpMoment.nowE8("YYYY-MM-DD HH:mm:ss")+"|"+text+"|\n")
   }
   res.json({"sDate":date[0]?nlpMoment.getDate(date[0],"YYYYMMDD"):null,
-            "sTime":date[0]?nlpMoment.getTime(date[0],"HH:mm:SS"):null,
+            "sTime":date[0]?nlpMoment.getTime(date[0],"HH:mm:ss"):null,
             "eDate":date[1]?nlpMoment.getDate(date[1],"YYYYMMDD"):null,
-            "eTime":date[1]?nlpMoment.getTime(date[1],"HH:mm:SS"):null
+            "eTime":date[1]?nlpMoment.getTime(date[1],"HH:mm:ss"):null
             })
 })
 app.get("/health/parse/:text",async (req,res)=>{
@@ -426,8 +426,8 @@ app.get("/health/parse/:text",async (req,res)=>{
   start=datetime[0]?datetime[0]:null
   end = datetime[1]?datetime[1]:null
   console.log("******",start,end)
-  console.log("@",nlpMoment.getTime(start,"HHmmSS"))
-  console.log("@",nlpMoment.getTime(end,"HHmmSS"))
+  console.log("@",nlpMoment.getTime(start,"HHmmss"))
+  console.log("@",nlpMoment.getTime(end,"HHmmss"))
   temp = await food.parse(text,start,end)
   if (temp.eat) result.eat=temp.eat
   temp = sign.parse(text,start,end)

@@ -3,7 +3,7 @@ const TextRec = require("./baiduAI.js").TextRec
 class Food extends Base{
   constructor(){
     super()
-    this.act=`(?<=还有|吃的是|吃了|喝了|抽了)[，]?`
+    this.act=`(?<=还有|吃的是|早餐是|午餐是|晚餐是|吃了|喝了|抽了|吸了)[，]?`
     this.liangci=`个|瓶|杯|碗|盒|袋|箱|桶|份|盘|根|支|包|罐|颗|粒|块|张|勺|汤匙|顿|片|毫升|口|代|大碗|大盘|大瓶`
     this.eat=`(${this.shuciA}+)?(${this.liangci})?(.+)`
     this.convTb={"克":{"克":1,"匙":10,"大匙":15,"小匙":5,"少许":5,"适量":10}}
@@ -14,9 +14,9 @@ class Food extends Base{
     let temp = this.convTb[toUnit] 
     return  temp && temp[fromUnit]*fromValue
   }
-  menuRec(menu){
+  menuRec(menu,zhuliao ="原料",fuliao="调料"){
     let textRec = new TextRec(menu)
-    let index=textRec.maxRight(["原料","调料"])
+    let index=textRec.maxRight([zhuliao,fuliao])
     textRec.exclude(index,{left:10,right:10})
     //let nameObj = textRec.findTitle()
     //console.log("title",nameObj)
@@ -26,7 +26,7 @@ class Food extends Base{
     let name="",method="",lastMethodIdx=null
     let text,things=[]
     textRec.words.map((x,i,s)=>{
-      if (x.words.match(/原料/)) {
+      if (x.words.match(new RegExp(zhuliao))) {
         name=textRec.findNearTop(i)[0]
         console.log("findNearTop",textRec.findNearTop(i),name)        
         bMenu=true
@@ -51,7 +51,7 @@ class Food extends Base{
     text=things.join("")
     
     text=this.replace(text,["：","；","，","。","、","（","）","／"],[":",";",",",".","|","(",")","/"])
-    text=this.remove(text,["原料","调料","■"])
+    text=this.remove(text,[zhuliao,fuliao,"■"])
     //reg=new RegExp(`[:,\\.]+([^\\d^各]+)((各)?\\d\\./]+)(匙|大匙|小匙|少许|适量|克|个|毫升)`,"g")
     let reg=new RegExp(`[:,\\.]+(.+?)(匙|大匙|小匙|少许|适量|克|个|毫升)`,"g")
     let reg1=new RegExp(`([^\\d^\\.^/]+)(各|[\\d\\./]+)`)
@@ -284,10 +284,10 @@ class Sign extends Base{
       value=this.formula2num([[match[3],match[4],match[5]],match[6],[match[8],match[9],match[10]]])
       unit =match[11]
       if (!unit) {
-        unit="千克"
+        unit="公斤"
       }
       value = Math.round(value * this.convert[unit]*10000)/10000
-      result.sign_weightKg=[{"unit":"千克",
+      result.sign_weightKg=[{"unit":"公斤",
                        "value":value,
                        "eDate":this.getDate(end),
                        "eTime":this.getTime(end)}]
@@ -298,9 +298,9 @@ class Sign extends Base{
 class Sport extends Base{
   constructor(){
     super()
-    this.act=`(?<=运动|步行|走|快走|慢走)[了]?`
+    this.act=`(?<=运动|步行|走|快走|慢走|跑了)[了]?`
     this.liangci = `部|步|米|公里|千米`
-    this.convert={"公里":1,"千米":1,"米":0.001}
+    this.convert={"公里":1,"千米":1,"米":0.001,"步":0.0005,"部":0.0005}
   }
   parse(text,start,end){
     let result={}
@@ -320,10 +320,8 @@ class Sport extends Base{
     if (steps) {
       value=this.flex2num([steps[2],steps[3],steps[4]])
       unit =steps[5]
-      if (unit=="千米" || unit=="米" || unit=="公里"){
-        value = Math.round(value * this.convert[unit]*10000)/10000
-        unit="公里"
-      }
+      value = Math.round(value * this.convert[unit]*10000)/10000
+      unit="公里"
       result.sport_steps=[{value,unit,
                        "eDate":this.getDate(end),
                        "eTime":this.getTime(end)}]

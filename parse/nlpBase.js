@@ -42,10 +42,10 @@ class Base{
   getTime(datetime){
     //datetime 必须是Date类型
     if (!datetime){
-      //return this.nowE8("HH:mm:SS")
-      return moment().format("HH:mm:SS")
+      //return this.nowE8("HH:mm:ss")
+      return moment().format("HH:mm:ss")
     }else{
-      //return this.nowE8(datetime.getTime()-28800000,"HH:mm:SS")
+      //return this.nowE8(datetime.getTime()-28800000,"HH:mm:ss")
       return moment(datetime.getTime()-28800000).format("HH:mm:ss")
     }
   }  

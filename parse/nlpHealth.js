@@ -243,7 +243,7 @@ class Sign extends Base{
   parse(text,start,end){
     let result={}
     let temp
-    temp = this.parseHeartRate(text,end)
+    temp = this.parseHeartRate(text,start,end)
     if (temp) result.sign_heartRate = temp.sign_heartRate
     temp = this.parseWeight(text,start,end)
     if (temp) result.sign_weightKg = temp.sign_weightKg
@@ -305,7 +305,7 @@ class Sport extends Base{
   parse(text,start,end){
     let result={}
     let temp
-    temp = this.parseSteps(text,end)
+    temp = this.parseSteps(text,start,end)
     if (temp) result.sport_steps = temp.sport_steps
     return result  
   }

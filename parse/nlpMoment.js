@@ -295,7 +295,7 @@ class NlpMoment extends Base{
         }else{
           temp = moment().utcOffset(8).add(value1,unit1).add(value2,unit2)
         }
-        console.log("new time:",temp.format("YYYY.MM.DD HH:mm:SS"))
+        console.log("new time:",temp.format("YYYY.MM.DD HH:mm:ss"))
         console.log("reg1Index+8",result[reg1Index+8])
         console.log("reg1Index+10",result[reg1Index+10],result[reg1Index+11],temp.month())
         console.log("reg1Index+13",result[reg1Index+13],result[reg1Index+14],temp.date())

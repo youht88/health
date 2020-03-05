@@ -159,6 +159,7 @@ app.get("/food/:code/:value/:unit",async function(req,res){
       }
       console.log(item)
     }
+    if (Array.isArray(item.name)) item.name=item.name[0]
     res.json(item)
   })  
   .catch(e=>{
@@ -207,34 +208,38 @@ app.get("/food/:name",async function(req,res){
 */
 app.post("/food/analyse/",(req,res)=>{
   let data = JSON.parse(req.body.data)
+  console.log("data:",data)
   let date = req.body.date
   let options = []
   let option={}
   let energyKj=[],fatG=[],chG=[],proteinG=[],sodiumMg=[]
-  for (let item of data.result.list){
-    if (date == Object.keys(item.data)[0]){
-      let eatValue= Object.values(item.data)[0].eat
+  //for (let item of data.result.list){
+  if (!Array.isArray(data)) data=[data]
+  for (let item of data){
+    if (date == Object.keys(item)[0]){
+      let eatValue= Object.values(item)[0].eat
       if (eatValue){
         for (let eatItem of eatValue){
           if (eatItem && eatItem.nutrition && eatItem.nutrition.energyKj){
-            energyKj.push([eatItem.time,eatItem.nutrition.energyKj[0],eatItem.nutrition.energyKj[1]])
+            energyKj.push([eatItem.eTime,eatItem.nutrition.energyKj[0],eatItem.nutrition.energyKj[1]])
           }
           if (eatItem && eatItem.nutrition && eatItem.nutrition.proteinG){
-            proteinG.push([eatItem.time,eatItem.nutrition.proteinG[0],eatItem.nutrition.proteinG[1]])
+            proteinG.push([eatItem.eTime,eatItem.nutrition.proteinG[0],eatItem.nutrition.proteinG[1]])
           }
           if (eatItem && eatItem.nutrition && eatItem.nutrition.fatG){
-            fatG.push([eatItem.time,eatItem.nutrition.fatG[0],eatItem.nutrition.fatG[1]])
+            fatG.push([eatItem.eTime,eatItem.nutrition.fatG[0],eatItem.nutrition.fatG[1]])
           }
           if (eatItem && eatItem.nutrition && eatItem.nutrition.chG){
-            chG.push([eatItem.time,eatItem.nutrition.chG[0],eatItem.nutrition.chG[1]])
+            chG.push([eatItem.eTime,eatItem.nutrition.chG[0],eatItem.nutrition.chG[1]])
           }
           if (eatItem && eatItem.nutrition && eatItem.nutrition.sodiumMg){
-            sodiumMg.push([eatItem.time,eatItem.nutrition.sodiumMg[0],eatItem.nutrition.sodiumMg[1]])
+            sodiumMg.push([eatItem.eTime,eatItem.nutrition.sodiumMg[0],eatItem.nutrition.sodiumMg[1]])
           }
         }
       }
     }
   }
+  console.log("energyKj:",energyKj)
   let sumEnergyKj,overEnergyKj
   if (energyKj.length!=0){
     sumEnergyKj = energyKj.map(x=>x[1]).reduce((x,y)=>x+y)
@@ -429,12 +434,17 @@ app.get("/health/parse/:text",async (req,res)=>{
   console.log("@",nlpMoment.getTime(start,"HHmmss"))
   console.log("@",nlpMoment.getTime(end,"HHmmss"))
   temp = await food.parse(text,start,end)
-  if (temp.eat) result.eat=temp.eat
+  if (temp.eat) 
+    result.eat=temp.eat
+  
   temp = sign.parse(text,start,end)
   if (temp.sign_weightKg) result.sign_weightKg=temp.sign_weightKg
   if (temp.sign_heartRate) result.sign_heartRate=temp.sign_heartRate
+  
   temp = sport.parse(text,start,end)
-  if (temp.sport_steps) result.sport_steps=temp.sport_steps
+  if (temp.sport_steps) 
+    result.sport_steps=temp.sport_steps
+  
   temp = behavior.parse(text,start,end)
   if (temp.behavior_sleep) result.behavior_sleep=temp.behavior_sleep
   console.log("[result]:",result)

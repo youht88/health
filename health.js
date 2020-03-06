@@ -561,6 +561,19 @@ app.get("/benfordTest/:data",(req,res)=>{
    res.send(`<pre>${JSON.stringify(result,null,4)}</pre>`)
 })
 
+app.post("/ipfs/dagPut",async (req,res)=>{
+  let data = req.body.data
+  let cid  = await ipfs.dagPut(data)
+  res.send(cid)
+})
+
+app.post("/ipfs/dagGet",async (req,res)=>{
+  let cid = req.body.cid
+  let path = req.body.path
+  let data = await ipfs.dagGet(cid,path)
+  res.json(data)  
+})
+
 // 监听5000端口
 //var server=app.listen(5000, '0.0.0.0', function () {
 //  console.log('listening at =====> http://0.0.0.0:5000......');

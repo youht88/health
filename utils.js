@@ -829,18 +829,14 @@ class Ipfs {
   }
 
   /////////////// ipfs dag
-  async dagGet(cid){
-    var data = await this.client.dag.get(cid)
+  async dagGet(cid,path){
+    var data = await this.client.dag.get(cid,path)
     return data.value
   }
   
   async dagPut(obj){
     var cid = await this.client.dag.put(obj)
     return cid.string
-  }
-  async dagGet(cid){
-    var data = await this.client.dag.get(cid)
-    return data.value
   }
   //当前版本步支持dag.tree功能
   //async dagTree(cid){

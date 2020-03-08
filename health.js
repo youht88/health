@@ -574,6 +574,41 @@ app.post("/ipfs/dagGet",async (req,res)=>{
   res.json(data)  
 })
 
+app.get("/ipfs/ls/:cid",async (req,res)=>{
+  let cid = req.params.cid
+  let data = await ipfs.ls(cid)
+  res.json(data)  
+})
+app.get("/ipfs/pinAdd/:cid",async (req,res)=>{
+  let cid = req.params.cid
+  let data = await ipfs.pinAdd(cid)
+  res.json(data)  
+})
+app.get("/ipfs/pinLs/:cid",async (req,res)=>{
+  let cid = req.params.cid
+  let data = await ipfs.pinLs(cid)
+  res.json(data)  
+})
+app.get("/ipfs/pinRm/:cid",async (req,res)=>{
+  let cid = req.params.cid
+  let data = await ipfs.pinRm(cid)
+  res.json(data)  
+})
+
+app.post("/db/save/",async (req,res)=>{
+  let data=req.body.data
+  let result  = await db.insertOne("health",data)
+  console.log(result)
+  res.json(result)
+})
+app.get("/db/fetch/:dbid",async (req,res)=>{
+  let dbid=req.params.dbid
+  console.log("dbid:",db.ObjectId(dbid))
+  dbid = db.ObjectId(dbid)
+  let result  = await db.findOne("health",{_id:dbid})
+  console.log(result)
+  res.json(result)
+})
 // 监听5000端口
 //var server=app.listen(5000, '0.0.0.0', function () {
 //  console.log('listening at =====> http://0.0.0.0:5000......');

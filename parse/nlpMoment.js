@@ -194,7 +194,9 @@ class NlpMoment extends Base{
     }else{
       for (let item of this.months){
         if (item.name==monthTextArr[1]){
-          toSetDate.months = moment().utcOffset(8).add(item.value,"month").month()
+          temp = moment().utcOffset(8).add(item.value,"month")
+          toSetDate.month = temp.month()
+          toSetDate.year = temp.year()
           break
         }
       }
@@ -205,7 +207,10 @@ class NlpMoment extends Base{
     }else{
       for (let item of this.dates){
         if (item.name==dateTextArr[1]){
-          toSetDate.date = moment().utcOffset(8).add(item.value,"days").date()
+          temp = moment().utcOffset(8).add(item.value,"days")
+          toSetDate.date = temp.date()
+          toSetDate.month = temp.month()
+          toSetDate.year = temp.year()
           break
         }
       }

@@ -6,6 +6,7 @@ const log4js = require("log4js")
 const b58 = require('base-x')('123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz')
 
 const MongoClient = require("mongodb")
+const ObjectId = require("mongodb").ObjectId
 
 const http = require('http');
 const querystring = require('querystring');
@@ -421,6 +422,7 @@ class DB{
   constructor(){
     this.client = {}    
     this.db = null
+    this.ObjectId = ObjectId
   }
   
   async init(url){
@@ -809,6 +811,29 @@ class Ipfs {
       chunks.push(chunk)
     }
     return Buffer.concat(chunks)
+  }
+  async ls(cid){
+    const result=[]
+    for await (const file of this.client.ls(cid)){
+      result.push(file)
+    }
+    return result    
+  }
+  ////////////// ipfs pin 
+  async pinAdd(cid){
+    var result = await this.client.pin.add(cid)
+    return result.map(x=>x.cid.string)
+  }
+  async pinRm(cid){
+    var result = await this.client.pin.rm(cid)
+    return result.map(x=>x.cid.string)
+  }
+  async pinLs(cid){
+    var result=[] 
+    for await (const {cid,type} of this.client.pin.ls(cid)){
+      result.push({cid,type})
+    }
+    return result.map(x=>{return {cid:x.cid.string,type:x.type}})
   }
   ////////////// ipfs block
   async blockPut(buf){

@@ -88,3 +88,19 @@ db.food.insert({"code":"6900873039005",
                     },
                 "unit":[{"name":"包/袋/碗","value":117}]
             })
+
+db.food.insert({"code":"Z11020152",
+                "type":"MD","name":["知柏地黄丸","水蜜丸"],
+                "imgHash":"",
+                "nutrition":{
+                    },
+                "unit":[{"name":"瓶","value":72},{"name":"粒","value":0.02},{"name":"个/次","value":6}]
+            })
+
+db.food.insert({"code":"Z44022467",
+                "type":"MD","name":["消炎利胆片"],
+                "imgHash":"",
+                "nutrition":{
+                    },
+                "unit":[{"name":"瓶","value":25},{"name":"粒/片","value":0.25},{"name":"个/次","value":1.5}]
+            })

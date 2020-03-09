@@ -21,8 +21,8 @@ var http = require("http")
 var httpServer = http.createServer(app)
 //var httpsServer = https.createServer(cerd,app) 
 
-httpServer.listen(6001,function(){
-  console.log("httpServer listen on 6001")
+httpServer.listen(5000,function(){
+  console.log("httpServer listen on 5000")
 })
 //httpsServer.listen(6001,function(){
 //  console.log("httpsServer listen on 6001")
@@ -31,12 +31,12 @@ httpServer.listen(6001,function(){
 
 var ipfs,db
 var start = async ()=>{
-  //ipfs = await utils.ipfs.init("/dns4/ipfs1/tcp/5001")
+  ipfs = await utils.ipfs.init("/dns4/ipfs1/tcp/5001")
   //ipfs = await utils.ipfs.init("/ip4/120.27.137.222/tcp/5001")
-  //await utils.db.init("mongo:27017/food")
-  ipfs = await utils.ipfs.init("/ip4/127.0.0.1/tcp/15081")
+  await utils.db.init("mongo:27017/food")
+  //ipfs = await utils.ipfs.init("/ip4/127.0.0.1/tcp/15081")
   //ipfs = await utils.ipfs.init("/ip4/120.27.137.222/tcp/5001")
-  await utils.db.init("127.0.0.1:27017/food")
+  //await utils.db.init("127.0.0.1:27017/food")
   
   db = utils.db
 }
@@ -559,6 +559,18 @@ app.get("/benfordTest/:data",(req,res)=>{
    let data=req.params.data.split(",")
    let result = nlpMoment.benfordTest(data)
    res.send(`<pre>${JSON.stringify(result,null,4)}</pre>`)
+})
+app.get("/ipfs/dagPut/:data",async (req,res)=>{
+  let data=JSON.parse(req.params.data)
+  let cid = await ipfs.dagPut(data)
+  res.send(cid)
+})
+app.get("/ipfs/dagGet/:cid",async (req,res)=>{
+  let cid=req.params.cid
+  console.log(cid)
+  let result = await ipfs.dagGet(cid)
+  console.log("?????",result)
+  res.send(result)
 })
 
 // 监听5000端口

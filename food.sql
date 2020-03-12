@@ -90,7 +90,7 @@ db.food.insert({"code":"6900873039005",
             })
 
 db.food.insert({"code":"Z11020152",
-                "type":"MD","name":["知柏地黄丸","水蜜丸"],
+                "type":"MD","name":["知柏地黄丸"],
                 "imgHash":"",
                 "nutrition":{
                     },

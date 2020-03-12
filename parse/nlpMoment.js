@@ -191,25 +191,36 @@ class NlpMoment extends Base{
     //month
     if (monthTextArr[0]){
         toSetDate.months=this.cn2num(monthTextArr[0]) - 1
-    }else{
+    }else if(monthTextArr[1]){
       for (let item of this.months){
         if (item.name==monthTextArr[1]){
-          toSetDate.months = moment().utcOffset(8).add(item.value,"month").month()
+          temp = moment().utcOffset(8).add(item.value,"month")
+          toSetDate.month = temp.month()
+          toSetDate.year = temp.year()
           break
         }
       }
+    }else{
+      toSetDate.month = moment().utcOffset(8).month()
     }
+    console.log("month",toSetDate)
     //day
     if (dateTextArr[0]){
         toSetDate.date=this.cn2num(dateTextArr[0])
-    }else{
+    }else if (dateTextArr[1]){
       for (let item of this.dates){
         if (item.name==dateTextArr[1]){
-          toSetDate.date = moment().utcOffset(8).add(item.value,"days").date()
+          temp = moment().utcOffset(8).add(item.value,"days")
+          toSetDate.date = temp.date()
+          toSetDate.month = temp.month()
+          toSetDate.year = temp.year()
           break
         }
       }
+    }else{
+      toSetDate.date = moment().utcOffset(8).date()
     }
+    console.log("date",toSetDate)
     return toSetDate
   }
   setTime(segText,hourText,minuteText){
@@ -225,7 +236,7 @@ class NlpMoment extends Base{
       for (let item of this.segs){
         if (item.seg.includes(segText)){
           if (item.time=="now"){
-            //toSetTime={}
+            toSetTime={}
           }else{
             temp=item.time.split(":")
             toSetTime={
@@ -236,7 +247,8 @@ class NlpMoment extends Base{
           }
         }
       }
-    }          
+    }      
+    console.log("seg",segText,toSetTime)    
     //hour
     if (hourText){
       temp = this.cn2num(hourText)
@@ -251,6 +263,7 @@ class NlpMoment extends Base{
         toSetTime.seconds=0
       }
     }
+    console.log("hour",hourText,toSetTime)
     //minute
     if (minuteText){
       if (minuteText=="半"){
@@ -259,7 +272,7 @@ class NlpMoment extends Base{
         toSetTime.minutes = this.cn2num(minuteText)
       }
     }
-    
+    console.log("minute",minuteText,toSetTime)
     return toSetTime
   }
   

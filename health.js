@@ -209,35 +209,29 @@ app.get("/food/:name",async function(req,res){
 app.post("/food/analyse/",(req,res)=>{
   let data = JSON.parse(req.body.data)
   console.log("data:",data)
-  let date = req.body.date
+  let sDate = req.body.sDate
+  let eDate = req.body.eDate
   let options = []
   let option={}
   let energyKj=[],fatG=[],chG=[],proteinG=[],sodiumMg=[]
   //for (let item of data.result.list){
   if (!Array.isArray(data)) data=[data]
-  for (let item of data){
-    if (date == Object.keys(item)[0]){
-      let eatValue= Object.values(item)[0].eat
-      if (eatValue){
-        for (let eatItem of eatValue){
-          if (eatItem && eatItem.nutrition && eatItem.nutrition.energyKj){
-            energyKj.push([eatItem.eTime,eatItem.nutrition.energyKj[0],eatItem.nutrition.energyKj[1]])
-          }
-          if (eatItem && eatItem.nutrition && eatItem.nutrition.proteinG){
-            proteinG.push([eatItem.eTime,eatItem.nutrition.proteinG[0],eatItem.nutrition.proteinG[1]])
-          }
-          if (eatItem && eatItem.nutrition && eatItem.nutrition.fatG){
-            fatG.push([eatItem.eTime,eatItem.nutrition.fatG[0],eatItem.nutrition.fatG[1]])
-          }
-          if (eatItem && eatItem.nutrition && eatItem.nutrition.chG){
-            chG.push([eatItem.eTime,eatItem.nutrition.chG[0],eatItem.nutrition.chG[1]])
-          }
-          if (eatItem && eatItem.nutrition && eatItem.nutrition.sodiumMg){
-            sodiumMg.push([eatItem.eTime,eatItem.nutrition.sodiumMg[0],eatItem.nutrition.sodiumMg[1]])
-          }
-        }
+  for (let eatItem of data){
+      if (eatItem && eatItem.nutrition && eatItem.nutrition.energyKj){
+        energyKj.push([eatItem.eTime,eatItem.nutrition.energyKj[0],eatItem.nutrition.energyKj[1]])
       }
-    }
+      if (eatItem && eatItem.nutrition && eatItem.nutrition.proteinG){
+        proteinG.push([eatItem.eTime,eatItem.nutrition.proteinG[0],eatItem.nutrition.proteinG[1]])
+      }
+      if (eatItem && eatItem.nutrition && eatItem.nutrition.fatG){
+        fatG.push([eatItem.eTime,eatItem.nutrition.fatG[0],eatItem.nutrition.fatG[1]])
+      }
+      if (eatItem && eatItem.nutrition && eatItem.nutrition.chG){
+        chG.push([eatItem.eTime,eatItem.nutrition.chG[0],eatItem.nutrition.chG[1]])
+      }
+      if (eatItem && eatItem.nutrition && eatItem.nutrition.sodiumMg){
+        sodiumMg.push([eatItem.eTime,eatItem.nutrition.sodiumMg[0],eatItem.nutrition.sodiumMg[1]])
+      }
   }
   console.log("energyKj:",energyKj)
   let sumEnergyKj,overEnergyKj
@@ -267,7 +261,7 @@ app.post("/food/analyse/",(req,res)=>{
   }
   
   option={
-    title: {text: '今日卡路里摄入情况',
+    title: {text: `${sDate}-${eDate}卡路里摄入情况`,
             subtext:`${sumEnergyKj}千焦,NRV:${overEnergyKj}%`},
     tooltip: {
       trigger: 'axis'
@@ -287,7 +281,7 @@ app.post("/food/analyse/",(req,res)=>{
   }
   options.push({name:"energy",width:"100%",height:"480px",option:option})
   option={
-    title:{text: '今日营养摄入情况',
+    title:{text: `${sDate}-${eDate}营养摄入情况`,
            subtext:`蛋白质${sumProteinG}克,NRV${overProteinG}%,脂肪${sumFatG}克,NRV${overFatG}%,碳水${sumChG}克,NRV:${overChG}%`
            },
     tooltip: {
@@ -335,7 +329,7 @@ app.post("/food/analyse/",(req,res)=>{
   options.push({name:"other",width:"100%",height:"480px",option:option})
 
   option={
-    title: {text: '今日钠的摄入情况',
+    title: {text: `${sDate}-${eDate}钠的摄入情况`,
             subtext:`${sumSodiumMg}毫克,NRV:${overSodiumMg}%`},
     tooltip: {
       trigger: 'axis'
@@ -573,6 +567,53 @@ app.get("/ipfs/dagGet/:cid",async (req,res)=>{
   res.send(result)
 })
 
+app.post("/ipfs/dagPut",async (req,res)=>{
+  let data = req.body.data
+  let cid  = await ipfs.dagPut(data)
+  res.send(cid)
+})
+
+app.post("/ipfs/dagGet",async (req,res)=>{
+  let cid = req.body.cid
+  let path = req.body.path
+  let data = await ipfs.dagGet(cid,path)
+  res.json(data)  
+})
+
+app.get("/ipfs/ls/:cid",async (req,res)=>{
+  let cid = req.params.cid
+  let data = await ipfs.ls(cid)
+  res.json(data)  
+})
+app.get("/ipfs/pinAdd/:cid",async (req,res)=>{
+  let cid = req.params.cid
+  let data = await ipfs.pinAdd(cid)
+  res.json(data)  
+})
+app.get("/ipfs/pinLs/:cid",async (req,res)=>{
+  let cid = req.params.cid
+  let data = await ipfs.pinLs(cid)
+  res.json(data)  
+})
+app.get("/ipfs/pinRm/:cid",async (req,res)=>{
+  let cid = req.params.cid
+  let data = await ipfs.pinRm(cid)
+  res.json(data)  
+})
+
+app.post("/db/save/",async (req,res)=>{
+  let data=req.body.data
+  let result  = await db.insertOne("health",data)
+  console.log(result)
+  res.json(result)
+})
+app.get("/db/fetch/:dbid",async (req,res)=>{
+  let dbid=req.params.dbid
+  dbid = db.ObjectId(dbid)
+  let result  = await db.findOne("health",{_id:dbid})
+  console.log(result)
+  res.json(result)
+})
 // 监听5000端口
 //var server=app.listen(5000, '0.0.0.0', function () {
 //  console.log('listening at =====> http://0.0.0.0:5000......');

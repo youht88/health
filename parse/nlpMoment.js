@@ -145,7 +145,7 @@ class NlpMoment extends Base{
   }
   setDate(yearTextArr,holidayText,monthTextArr,dateTextArr){
     let temp,lunar
-    let toSetDate={"years":0,"month":0,"date":1}
+    let toSetDate={"years":0,"months":0,"date":1}
     console.log(yearTextArr,holidayText,monthTextArr,dateTextArr)
     //year
     if (yearTextArr[0]){
@@ -195,13 +195,13 @@ class NlpMoment extends Base{
       for (let item of this.months){
         if (item.name==monthTextArr[1]){
           temp = moment().utcOffset(8).add(item.value,"month")
-          toSetDate.month = temp.month()
+          toSetDate.months = temp.month()
           toSetDate.year = temp.year()
           break
         }
       }
     }else{
-      toSetDate.month = moment().utcOffset(8).month()
+      toSetDate.months = moment().utcOffset(8).month()
     }
     console.log("month",toSetDate)
     //day
@@ -212,7 +212,7 @@ class NlpMoment extends Base{
         if (item.name==dateTextArr[1]){
           temp = moment().utcOffset(8).add(item.value,"days")
           toSetDate.date = temp.date()
-          toSetDate.month = temp.month()
+          toSetDate.months = temp.month()
           toSetDate.year = temp.year()
           break
         }

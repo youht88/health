@@ -13,7 +13,9 @@ var bodyParse = require('body-parser');
 var fs = require("fs")
 var http = require("http")
 //var https = require("https")
-var config = require("./config.json")
+var config = require("./config.js").config
+
+console.log("config",config,typeof(config))
 
 //var privateKey= fs.readFileSync('3448266_youht.cc.key','utf8')
 //var certKey = fs.readFileSync('3448266_youht.cc.pem','utf8')
@@ -155,7 +157,7 @@ app.get("/food/:code/:value/:unit",async function(req,res){
       res.json(item)
       return
     }
-    switch (item.type){\
+    switch (item.type){
     default:     
       for (let i in item.nutrition){
         item.nutrition[i][0]=parseInt(item.nutrition[i][0]/100*unitValue*value*100)/100

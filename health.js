@@ -15,7 +15,7 @@ var http = require("http")
 //var https = require("https")
 var config = require("./config.js").config
 
-console.log("config",config,typeof(config))
+console.log("config",config)
 
 //var privateKey= fs.readFileSync('3448266_youht.cc.key','utf8')
 //var certKey = fs.readFileSync('3448266_youht.cc.pem','utf8')
@@ -421,7 +421,8 @@ app.get("/moment/parse/:text",(req,res)=>{
   res.json({"sDate":date[0]?nlpMoment.getDate(date[0],"YYYYMMDD"):null,
             "sTime":date[0]?nlpMoment.getTime(date[0],"HH:mm:ss"):null,
             "eDate":date[1]?nlpMoment.getDate(date[1],"YYYYMMDD"):null,
-            "eTime":date[1]?nlpMoment.getTime(date[1],"HH:mm:ss"):null
+            "eTime":date[1]?nlpMoment.getTime(date[1],"HH:mm:ss"):null,
+            "acc":date[2]
             })
 })
 app.get("/health/parse/:text",async (req,res)=>{

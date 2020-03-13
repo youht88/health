@@ -14,6 +14,12 @@ class Food extends Base{
     let temp = this.convTb[toUnit] 
     return  temp && temp[fromUnit]*fromValue
   }
+  nutrionRec(nu){
+    let textRec = new TextRec(nu)
+    let index=textRec.maxRight([,fuliao])
+    textRec.exclude(index,{left:10,right:10})
+    
+  }
   menuRec(menu,zhuliao ="原料",fuliao="调料"){
     let textRec = new TextRec(menu)
     let index=textRec.maxRight([zhuliao,fuliao])

@@ -56,7 +56,7 @@ start()
   console.log(err)
   process.exit(-1)
 })
-// 设置图片存储路径
+// 设置媒体存储路径
 var storage = multer.diskStorage({
   destination: function(req, file, cb) {
     cb(null, './temp');
@@ -91,8 +91,8 @@ app.all('*',function (req, res, next) {
 });
  
 // 文件上传请求处理，upload.array 支持多文件上传，第二个参数是上传文件数目
-app.post('/img/upload', upload.single('img'), async function (req, res) {
-  // 读取上传的图片信息
+app.post('/ipfs/upload', upload.single('file'), async function (req, res) {
+  // 读取上传的文件信息
   var file = req.file;
   // 设置返回结果
   var result = {};
@@ -110,7 +110,7 @@ app.post('/img/upload', upload.single('img'), async function (req, res) {
     })
   }
 });
-app.get('/img/download/:cid',async function(req,res){
+app.get('/ipfs/download/:cid',async function(req,res){
   var cid = req.params.cid
   ipfs.cat(cid).then(content=>{
     let result = JSON.parse(content.toString())
@@ -218,30 +218,12 @@ app.post("/food/analyse/",(req,res)=>{
   let options = []
   let option={}
   let energyKj=[],fatG=[],chG=[],proteinG=[],sodiumMg=[]
-  for (let item of data.result.list){
-    if (date == Object.keys(item.data)[0]){
-      let eatValue= Object.values(item.data)[0].eat
-      if (eatValue){
-        for (let eatItem of eatValue){
-          if (eatItem && eatItem.nutrition && eatItem.nutrition.energyKj){
-            energyKj.push([eatItem.time,eatItem.nutrition.energyKj[0],eatItem.nutrition.energyKj[1]])
-          }
-          if (eatItem && eatItem.nutrition && eatItem.nutrition.proteinG){
-            proteinG.push([eatItem.time,eatItem.nutrition.proteinG[0],eatItem.nutrition.proteinG[1]])
-          }
-          if (eatItem && eatItem.nutrition && eatItem.nutrition.fatG){
-            fatG.push([eatItem.time,eatItem.nutrition.fatG[0],eatItem.nutrition.fatG[1]])
-          }
-          if (eatItem && eatItem.nutrition && eatItem.nutrition.chG){
-            chG.push([eatItem.time,eatItem.nutrition.chG[0],eatItem.nutrition.chG[1]])
-          }
-          if (eatItem && eatItem.nutrition && eatItem.nutrition.sodiumMg){
-            sodiumMg.push([eatItem.time,eatItem.nutrition.sodiumMg[0],eatItem.nutrition.sodiumMg[1]])
-          }
-        }
-      }
-    }
-  }
+  
+  energyKj = _.chain(data).map(x=>{return [x.eDate.substr(5)+"\n"+x.eTime.substr(0,5),x.nutrition.energyKj[0],x.nutrition.energyKj[1]]}).value()
+  proteinG = _.chain(data).map(x=>{return [x.eDate.substr(5)+"\n"+x.eTime.substr(0,5),x.nutrition.proteinG[0],x.nutrition.proteinG[1]]}).value()
+  fatG = _.chain(data).map(x=>{return [x.eDate.substr(5)+"\n"+x.eTime.substr(0,5),x.nutrition.fatG[0],x.nutrition.fatG[1]]}).value()
+  chG = _.chain(data).map(x=>{return [x.eDate.substr(5)+"\n"+x.eTime.substr(0,5),x.nutrition.chG[0],x.nutrition.chG[1]]}).value()
+  sodiumMg = _.chain(data).map(x=>{return [x.eDate.substr(5)+"\n"+x.eTime.substr(0,5),x.nutrition.sodiumMg[0],x.nutrition.sodiumMg[1]]}).value()
   let sumEnergyKj,overEnergyKj
   if (energyKj.length!=0){
     sumEnergyKj = energyKj.map(x=>x[1]).reduce((x,y)=>x+y)
@@ -270,6 +252,7 @@ app.post("/food/analyse/",(req,res)=>{
   
   option={
     title: {text: '今日卡路里摄入情况',
+            left: 'center',
             subtext:`${sumEnergyKj}千焦,NRV:${overEnergyKj}%`},
     tooltip: {
       trigger: 'axis'
@@ -290,7 +273,8 @@ app.post("/food/analyse/",(req,res)=>{
   options.push({name:"energy",width:"100%",height:"480px",option:option})
   option={
     title:{text: '今日营养摄入情况',
-           subtext:`蛋白质${sumProteinG}克,NRV${overProteinG}%,脂肪${sumFatG}克,NRV${overFatG}%,碳水${sumChG}克,NRV:${overChG}%`
+           left: 'center',
+           subtext:`蛋白质${sumProteinG.toFixed(2)}克,NRV${overProteinG.toFixed(2)}%\n脂肪${sumFatG.toFixed(2)}克,NRV${overFatG.toFixed(2)}%\n碳水${sumChG.toFixed(2)}克,NRV:${overChG.toFixed(2)}%`
            },
     tooltip: {
       trigger: 'axis'
@@ -304,6 +288,8 @@ app.post("/food/analyse/",(req,res)=>{
     },
     legend: {
       data: ['蛋白质','脂肪', '碳水'],
+      x:'center',
+      y:'bottom'
     },
     series: [{
       name: '蛋白质',
@@ -338,6 +324,7 @@ app.post("/food/analyse/",(req,res)=>{
 
   option={
     title: {text: '今日钠的摄入情况',
+            left: 'center',
             subtext:`${sumSodiumMg}毫克,NRV:${overSodiumMg}%`},
     tooltip: {
       trigger: 'axis'

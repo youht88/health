@@ -184,13 +184,13 @@ class NlpMoment extends Base{
         }
       }
     }else{
-      if (toSetDate.acc!="year")
+      if (toSetDate.acc!="years")
         toSetDate.months = moment().utcOffset(8).month()
     }
     console.log("month",monthTextArr,toSetDate)
     //holiday
     if (holidayText){
-      toSetDate.acc="date"
+      toSetDate.acc="days"
       for (let item of this.holidays){
         if (item.holi.includes(holidayText)){
           if (item.type=="农历"){
@@ -227,7 +227,7 @@ class NlpMoment extends Base{
         }
       }
     }else{
-      if (toSetDate.acc!="month" && toSetDate.acc!="year" && toSetDate.acc!="date")
+      if (toSetDate.acc!="months" && toSetDate.acc!="years" && toSetDate.acc!="days")
       toSetDate.date = moment().utcOffset(8).date()
     }
     console.log("date",dateTextArr,toSetDate)
@@ -327,10 +327,9 @@ class NlpMoment extends Base{
           temp = temp.startOf("months")
         }else if (unit1=="days"){
           temp = temp.startOf("days")
-        }
-        if (unit2=="hours"){
+        }else if (unit1=="hours"){
           temp = temp.startOf("hours")
-        }else if (unit2=="minutes"){
+        }else if (unit1=="minutes"){
           temp = temp.startOf("minutes")
         }
 
@@ -345,12 +344,12 @@ class NlpMoment extends Base{
                                  [result[reg1Index+10]?result[reg1Index+10]:(unit1=="months"?temp.month()+1:undefined),result[reg1Index+11]], //月
                                  [result[reg1Index+13]?result[reg1Index+13]:(unit1=="days"?temp.date():undefined),result[reg1Index+14]]) //日
         toSetTime = this.setTime(result[reg1Index+15], //seg
-                                 result[reg1Index+17]?result[reg1Index+17]:(unit2=="hours"?temp.hour():undefined), //hour
-                                 result[reg1Index+19]?result[reg1Index+19]:(unit2=="minutes"?temp.minute():undefined)) //minutes
+                                 result[reg1Index+17]?result[reg1Index+17]:(unit1=="hours"?temp.hour():undefined), //hour
+                                 result[reg1Index+19]?result[reg1Index+19]:(unit1=="minutes"?temp.minute():undefined)) //minutes
         console.log("date,time",toSetDate,toSetTime)
         
         result = moment().utcOffset(8).set(toSetDate).set(toSetTime).toDate()
-        return {datetime:this.nowE8(result.getTime()),acc:toSetTime.acc||unit2||toSetDate.acc||unit1}
+        return {datetime:this.nowE8(result.getTime()),acc:toSetTime.acc||toSetDate.acc||unit1}
       }
       
       if (result[reg2Index]){ //第二种语句：上个礼拜五下午3点、下个周末早上9点
@@ -370,7 +369,7 @@ class NlpMoment extends Base{
         console.log(value,unit,direct,toSetTime)
         
         result = moment().utcOffset(8).startOf("week").set(toSetTime).add(value,"days").toDate()
-        return {datetime:this.nowE8(result.getTime()),acc:toSetTime.acc||"date"}
+        return {datetime:this.nowE8(result.getTime()),acc:toSetTime.acc||"days"}
       }
 
       if (result[reg3Index]){ // 第三种语句：2020年11月5日7点半

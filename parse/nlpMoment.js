@@ -105,6 +105,7 @@ class NlpMoment extends Base{
     this.weekci=`一|二|三|四|五|六|日|天|末|[1-6]`
     this.liangci = `秒|秒钟|分|分钟|小时|钟头|天|周|礼拜|星期|月|年`
     this.dateExp=`((${this.shuci}+)[个]?(半)?(${this.liangci})(${this.shuci}+)?(${this.liangci})?[之以]?(前|后)((${this.cnHolidays})[节日]?)?((${this.shuci}+)月|(${this.cnMonths}))?((${this.shuci}+)[日号]|(${this.cnDates}))?(${this.cnSegs})?((${this.shuci}+)[点小时:]+)?((${this.shuci}+)(分|分钟)?)?)|((这|本|上|前|下|后)[个]?(星期|礼拜|周)(${this.weekci})(${this.cnSegs})?((${this.shuci}+)[点小时:]+)?((${this.shuci}+)(分钟|分)?)?)|(((${this.shuci}+)年|(${this.cnYears}))?((${this.cnHolidays})[节日]?)?((${this.shuci}+)月|(${this.cnMonths}))?((${this.shuci}+)[日号]|(${this.cnDates}))?(${this.cnSegs}?)?((${this.shuci}+)[点小时:]+)?((${this.shuci}+)(分|分钟)?)?)`
+    this.dateExp=this.dateExp+`((上|这|本|最近这|最近|近)个?(${this.shuci}*)个?(年|月|日|天|季度|星期|礼拜|周|钟头|小时|时辰|分钟))`
   }
   startOf(){
     var nowTemp = new Date();//当前时间
@@ -144,7 +145,7 @@ class NlpMoment extends Base{
                  "分":"minutes","分钟":"minutes",
                  "小时":"hours","钟头":"hours",
                  "天":"days","周":"weeks","星期":"weeks",
-                 "礼拜":"weeks","月":"months","年":"years"}
+                 "礼拜":"weeks","月":"months","季度":"quarters","年":"years"}
     return cn2unit[str]
   }
   setDate(yearTextArr,holidayText,monthTextArr,dateTextArr){
@@ -298,12 +299,14 @@ class NlpMoment extends Base{
     let reg1Index = 1 
     let reg2Index = 22
     let reg3Index = 32
+    let reg4Index = 50
     result=text.match(new RegExp(`${this.dateExp}`))
-    console.log(new RegExp(`${this.dateExp}`))
+  
     if (result){    
         console.log("reg1",result[reg1Index])
         console.log("reg2",result[reg2Index])
         console.log("reg3",result[reg3Index])
+        console.log("reg4",result[reg4Index])
         console.log("result",result)
       if (result[reg1Index]){ //第一种语句：几分钟前、三小时后
         value1 = this.cn2num(result[reg1Index+1])
@@ -387,6 +390,25 @@ class NlpMoment extends Base{
         result = moment().utcOffset(8).set(toSetDate).set(toSetTime).toDate()
         console.log("result3",result,toSetTime.acc||toSetDate.acc)
         return {datetime:this.nowE8(result.getTime()),acc:toSetTime.acc||toSetDate.acc}
+      }
+
+      if (result[reg4Index]){ // 第四种语句：最近这3个月、这两个季度
+        temp = result[reg4Index+1]
+        value = result[reg4Index+2]
+        unit = this.translateUnit(result[reg4Index+3])
+        console.log(temp,value,unit)
+        if (temp=="上"){
+
+        }else if (temp=="下"){
+
+        }else{
+          if (!value) value="1"
+          value=this.cn2num(value)
+          console.log("reg4 start:",moment().utcOffset(8).startOf(unit).toDate())
+          result = moment().utcOffset(8).startOf(unit).subtract(value,unit).toDate()
+          console.log("reg4 result",result) 
+          return  {datetime:this.nowE8(result.getTime())}    
+        }      
       }
     }else{
       return null

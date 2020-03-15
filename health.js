@@ -568,8 +568,13 @@ app.post("/ipfs/dagPut",async (req,res)=>{
 app.post("/ipfs/dagGet",async (req,res)=>{
   let cid = req.body.cid
   let path = req.body.path
-  let data = await ipfs.dagGet(cid,path)
-  res.json(data)  
+  try{  
+    let data = await ipfs.dagGet(cid,path)
+    res.json(data)  
+  }catch(error){
+    console.log("ipfs/dagGet",cid,path,error)
+    res.json({})
+  }
 })
 
 app.get("/ipfs/ls/:cid",async (req,res)=>{

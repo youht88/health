@@ -356,8 +356,7 @@ class NlpMoment extends Base{
         console.log(value,unit,direct,toSetTime)
         
         result = moment().utcOffset(8).startOf("week").set(toSetTime).add(value,"days").toDate()
-        console.log(this.nowE8(result))
-        return {datetime:this.nowE8(result.getTime()),acc:toSetTime.acc||toSetDate.acc}
+        return {datetime:this.nowE8(result.getTime()),acc:toSetTime.acc||"date"}
       }
 
       if (result[reg3Index]){ // 第三种语句：2020年11月5日7点半
@@ -392,6 +391,7 @@ class NlpMoment extends Base{
     }
     if (toParse[3]){
       let temp = this.parse(toParse[3])
+      console.log("end parse end",temp)
       if (temp){
         let datetime = temp.datetime 
         acc = temp.acc
@@ -415,17 +415,20 @@ class NlpMoment extends Base{
               start = datetime
               end =  this.nowE8(moment(datetime).endOf("hour").toDate().getTime()-8*60*60*1000)
               break
-          case "minute":
+            case "minute":
               start = datetime
               end = datetime
               break
+            default:
+              start= datetime
+              end = datetime
           }
         }
       }
-    }
     console.log("result parseDuration",start,end,acc)
     return [start,end,acc]
   }
+}
   help(topic=null){
       let text=
       `
@@ -452,5 +455,4 @@ class NlpMoment extends Base{
   }
 }
 
-//ok
 exports.nlpMoment  = new NlpMoment()

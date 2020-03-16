@@ -104,8 +104,12 @@ class NlpMoment extends Base{
     
     this.weekci=`一|二|三|四|五|六|日|天|末|[1-6]`
     this.liangci = `秒|秒钟|分|分钟|小时|钟头|天|周|礼拜|星期|月|年`
-    this.dateExp=`((${this.shuci}+)[个]?(半)?(${this.liangci})(${this.shuci}+)?(${this.liangci})?[之以]?(前|后)((${this.cnHolidays})[节日]?)?((${this.shuci}+)月|(${this.cnMonths}))?((${this.shuci}+)[日号]|(${this.cnDates}))?(${this.cnSegs})?((${this.shuci}+)[点小时:]+)?((${this.shuci}+)(分|分钟)?)?)|((这|本|上|前|下|后)[个]?(星期|礼拜|周)(${this.weekci})(${this.cnSegs})?((${this.shuci}+)[点小时:]+)?((${this.shuci}+)(分钟|分)?)?)|(((${this.shuci}+)年|(${this.cnYears}))?((${this.cnHolidays})[节日]?)?((${this.shuci}+)月|(${this.cnMonths}))?((${this.shuci}+)[日号]|(${this.cnDates}))?(${this.cnSegs}?)?((${this.shuci}+)[点小时:]+)?((${this.shuci}+)(分|分钟)?)?)`
-    this.dateExp=this.dateExp+`((上|这|本|最近这|最近|近)个?(${this.shuci}*)个?(年|月|日|天|季度|星期|礼拜|周|钟头|小时|时辰|分钟))`
+    let dateExp1=`((${this.shuci}+)[个]?(半)?(${this.liangci})(${this.shuci}+)?(${this.liangci})?[之以]?(前|后)((${this.cnHolidays})[节日]?)?((${this.shuci}+)月|(${this.cnMonths}))?((${this.shuci}+)[日号]|(${this.cnDates}))?(${this.cnSegs})?((${this.shuci}+)[点小时:]+)?((${this.shuci}+)(分|分钟)?)?)`
+    let dateExp2=`((这|本|上|前|下|后)[个]?(星期|礼拜|周)(${this.weekci})(${this.cnSegs})?((${this.shuci}+)[点小时:]+)?((${this.shuci}+)(分钟|分)?)?)`
+    let dateExp3=`(((${this.shuci}+)年|(${this.cnYears}))?((${this.cnHolidays})[节日]?)?((${this.shuci}+)月|(${this.cnMonths}))?((${this.shuci}+)[日号]|(${this.cnDates}))?(${this.cnSegs}?)?((${this.shuci}+)[点小时:]+)?((${this.shuci}+)(分|分钟)?)?)`
+    let dateExp4=`((上|本|最近这|最近|近|接下来这|接下来|这|下)个?(${this.shuci}*)个?(年|月|日|天|季度|星期|礼拜|周|钟头|小时|时辰|分钟))`
+    this.dateExp = `${dateExp1}|${dateExp2}|${dateExp3}|${dateExp4}`
+    console.log(new RegExp(this.dateExp))
   }
   startOf(){
     var nowTemp = new Date();//当前时间
@@ -321,6 +325,7 @@ class NlpMoment extends Base{
         direct = result[reg1Index+6]
         if (direct=="前"){
           temp = moment().utcOffset(8).subtract(value1,unit1).subtract(value2,unit2)
+          console.log("?????",value1,unit1,value2,unit2,temp.toDate())
         }else{
           temp = moment().utcOffset(8).add(value1,unit1).add(value2,unit2)
         }
@@ -331,7 +336,8 @@ class NlpMoment extends Base{
         }else if (unit1=="days"){
           temp = temp.startOf("days")
         }else if (unit1=="hours"){
-          temp = temp.startOf("hours")
+          //两小时前不应被认为是去掉分钟数的时间
+          //temp = temp.startOf("hours")
         }else if (unit1=="minutes"){
           temp = temp.startOf("minutes")
         }
@@ -342,6 +348,8 @@ class NlpMoment extends Base{
         console.log("reg1Index+10",result[reg1Index+10],result[reg1Index+11],temp.month())
         console.log("reg1Index+13",result[reg1Index+13],result[reg1Index+14],temp.date())
 
+        
+        /*
         toSetDate = this.setDate([temp.year(),undefined], //year
                                  result[reg1Index+8],     //holiday
                                  [result[reg1Index+10]?result[reg1Index+10]:(unit1=="months"?temp.month()+1:undefined),result[reg1Index+11]], //月
@@ -349,6 +357,14 @@ class NlpMoment extends Base{
         toSetTime = this.setTime(result[reg1Index+15], //seg
                                  result[reg1Index+17]?result[reg1Index+17]:(unit1=="hours"?temp.hour():undefined), //hour
                                  result[reg1Index+19]?result[reg1Index+19]:(unit1=="minutes"?temp.minute():undefined)) //minutes
+        */
+        toSetDate = this.setDate([temp.year(),undefined], //year
+                                 result[reg1Index+8],     //holiday
+                                [result[reg1Index+10]?result[reg1Index+10]:(temp.month()+1),result[reg1Index+11]], //月
+                                [result[reg1Index+13]?result[reg1Index+13]:(temp.date()),result[reg1Index+14]]) //日
+        toSetTime = this.setTime(result[reg1Index+15], //seg
+                                result[reg1Index+17]?result[reg1Index+17]:(temp.hour()), //hour
+                                result[reg1Index+19]?result[reg1Index+19]:(temp.minute())) //minutes
         console.log("date,time",toSetDate,toSetTime)
         
         result = moment().utcOffset(8).set(toSetDate).set(toSetTime).toDate()
@@ -396,19 +412,25 @@ class NlpMoment extends Base{
         temp = result[reg4Index+1]
         value = result[reg4Index+2]
         unit = this.translateUnit(result[reg4Index+3])
+        if (!value) value="1"
+        value=this.cn2num(value)
         console.log(temp,value,unit)
+        let start,end,base
         if (temp=="上"){
-
-        }else if (temp=="下"){
-
+           end = this.nowE8(moment().utcOffset(8).toDate().getTime())
+           base = moment().utcOffset(8).startOf(unit).subtract(1,unit)
+           start = this.nowE8(base.subtract(value - 1,unit).toDate().getTime())         
+        }else if (temp=="接下来这"||temp=="接下来"||temp=="下"){
+           start = this.nowE8(moment().utcOffset(8).toDate().getTime())
+           base = moment().utcOffset(8).endOf(unit).add(1,unit)
+           end = this.nowE8(base.add(value - 1,unit).toDate().getTime())         
         }else{
-          if (!value) value="1"
-          value=this.cn2num(value)
-          console.log("reg4 start:",moment().utcOffset(8).startOf(unit).toDate())
-          result = moment().utcOffset(8).startOf(unit).subtract(value,unit).toDate()
-          console.log("reg4 result",result) 
-          return  {datetime:this.nowE8(result.getTime())}    
-        }      
+          end = this.nowE8(moment().utcOffset(8).toDate().getTime())
+          base = moment().utcOffset(8).startOf(unit)
+          start = this.nowE8(base.subtract(value - 1,unit).toDate().getTime())         
+       }
+        console.log("reg4 result",result) 
+        return  {sDatetime:start,eDatetime:end,acc:unit}    
       }
     }else{
       return null
@@ -430,34 +452,39 @@ class NlpMoment extends Base{
       if (temp){
         let datetime = temp.datetime 
         acc = temp.acc
-        if (start) {
-          end = datetime
-        }else{
-          switch (acc){
-            case "years":
-              start = datetime
-              end =  this.nowE8(moment(datetime).endOf("year").toDate().getTime())
-              break
-            case "months":
-              start = datetime
-              end =  this.nowE8(moment(datetime).endOf("month").toDate().getTime())
-              break
-            case "days":
-              start = datetime
-              end =  this.nowE8(moment(datetime).endOf("day").toDate().getTime())
-              break
-            case "hours":
-              start = datetime
-              end =  this.nowE8(moment(datetime).endOf("hour").toDate().getTime()-8*60*60*1000)
-              break
-            case "minutes":
-              start = datetime
-              end = datetime
-              break
-            default:
-              start= datetime
-              end = datetime
+        if (datetime){
+          if (start) {
+            end = datetime
+          }else{
+            switch (acc){
+              case "years":
+                start = datetime
+                end =  this.nowE8(moment(datetime).endOf("year").toDate().getTime())
+                break
+              case "months":
+                start = datetime
+                end =  this.nowE8(moment(datetime).endOf("month").toDate().getTime())
+                break
+              case "days":
+                start = datetime
+                end =  this.nowE8(moment(datetime).endOf("day").toDate().getTime())
+                break
+              case "hours":
+                start = datetime
+                end =  this.nowE8(moment(datetime).endOf("hour").toDate().getTime()-8*60*60*1000)
+                break
+              case "minutes":
+                start = datetime
+                end = datetime
+                break
+              default:
+                start= datetime
+                end = datetime
+            }
           }
+        }else{
+          start = temp.sDatetime
+          end = temp.eDatetime
         }
       }
     console.log("result parseDuration",start,end,acc)

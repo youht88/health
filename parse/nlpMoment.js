@@ -108,7 +108,7 @@ class NlpMoment extends Base{
     let dateExp2=`((这|本|上|前|下|后)[个]?(星期|礼拜|周)(${this.weekci})(${this.cnSegs})?((${this.shuci}+)[点小时:]+)?((${this.shuci}+)(分钟|分)?)?)`
     let dateExp3=`(((${this.shuci}+)年|(${this.cnYears}))?((${this.cnHolidays})[节日]?)?((${this.shuci}+)月|(${this.cnMonths}))?((${this.shuci}+)[日号]|(${this.cnDates}))?(${this.cnSegs}?)?((${this.shuci}+)[点小时:]+)?((${this.shuci}+)(分|分钟)?)?)`
     let dateExp4=`((上|本|最近这|最近|近|接下来这|接下来|这|下)个?(${this.shuci}*)个?(年|月|日|天|季度|星期|礼拜|周|钟头|小时|时辰|分钟))`
-    this.dateExp = `${dateExp1}|${dateExp2}|${dateExp3}|${dateExp4}`
+    this.dateExp = `${dateExp1}|${dateExp2}|${dateExp4}|${dateExp3}`
     console.log(new RegExp(this.dateExp))
   }
   startOf(){
@@ -302,8 +302,8 @@ class NlpMoment extends Base{
     let toSetDate={} , toSetTime={}
     let reg1Index = 1 
     let reg2Index = 22
-    let reg3Index = 32
-    let reg4Index = 50
+    let reg3Index = 36 //32
+    let reg4Index = 32 //50
     result=text.match(new RegExp(`${this.dateExp}`))
   
     if (result){    

@@ -104,12 +104,10 @@ class NlpMoment extends Base{
     
     this.weekci=`一|二|三|四|五|六|日|天|末|[1-6]`
     this.liangci = `秒|秒钟|分|分钟|小时|钟头|天|周|礼拜|星期|月|年`
-    let dateExp1=`((${this.shuci}+)[个]?(半)?(${this.liangci})(${this.shuci}+)?(${this.liangci})?[之以]?(前|后)((${this.cnHolidays})[节日]?)?((${this.shuci}+)月|(${this.cnMonths}))?((${this.shuci}+)[日号]|(${this.cnDates}))?(${this.cnSegs})?((${this.shuci}+)[点小时:]+)?((${this.shuci}+)(分|分钟)?)?)`
-    let dateExp2=`((这|本|上|前|下|后)[个]?(星期|礼拜|周)(${this.weekci})(${this.cnSegs})?((${this.shuci}+)[点小时:]+)?((${this.shuci}+)(分钟|分)?)?)`
-    let dateExp3=`(((${this.shuci}+)年|(${this.cnYears}))?((${this.cnHolidays})[节日]?)?((${this.shuci}+)月|(${this.cnMonths}))?((${this.shuci}+)[日号]|(${this.cnDates}))?(${this.cnSegs}?)?((${this.shuci}+)[点小时:]+)?((${this.shuci}+)(分|分钟)?)?)`
-    let dateExp4=`((上|本|最近这|最近|近|接下来这|接下来|这|下)个?(${this.shuci}*)个?(年|月|日|天|季度|星期|礼拜|周|钟头|小时|时辰|分钟))`
-    this.dateExp = `${dateExp1}|${dateExp2}|${dateExp4}|${dateExp3}`
-    console.log(new RegExp(this.dateExp))
+    this.dateExp1=`((${this.shuci}+)[个]?(半)?(${this.liangci})(${this.shuci}+)?(${this.liangci})?[之以]?(前|后)((${this.cnHolidays})[节日]?)?((${this.shuci}+)月|(${this.cnMonths}))?((${this.shuci}+)[日号]|(${this.cnDates}))?(${this.cnSegs})?((${this.shuci}+)[点小时:]+)?((${this.shuci}+)(分|分钟)?)?)`
+    this.dateExp2=`((这|本|上|前|下|后)[个]?(星期|礼拜|周)(${this.weekci})(${this.cnSegs})?((${this.shuci}+)[点小时:]+)?((${this.shuci}+)(分钟|分)?)?)`
+    this.dateExp3=`(((${this.shuci}+)年|(${this.cnYears}))?((${this.cnHolidays})[节日]?)?((${this.shuci}+)月|(${this.cnMonths}))?((${this.shuci}+)[日号]|(${this.cnDates}))?(${this.cnSegs}?)?((${this.shuci}+)[点小时:]+)?((${this.shuci}+)(分|分钟)?)?)`
+    this.dateExp4=`((上|过去|本|最近这|最近|近|接下来这|接下来|这|下)个?的?(${this.shuci}*)个?(年|月|日|天|季度|星期|礼拜|周|钟头|小时|时辰|分钟))`
   }
   startOf(){
     var nowTemp = new Date();//当前时间
@@ -297,143 +295,135 @@ class NlpMoment extends Base{
   parse(text){
     let result
     let value,unit,value1,unit1,value2,unit2,direct,half
-    let year,month,date,seg,hour,minute
     let temp
     let toSetDate={} , toSetTime={}
-    let reg1Index = 1 
-    let reg2Index = 22
-    let reg3Index = 36 //32
-    let reg4Index = 32 //50
-    result=text.match(new RegExp(`${this.dateExp}`))
   
-    if (result){    
-        console.log("reg1",result[reg1Index])
-        console.log("reg2",result[reg2Index])
-        console.log("reg3",result[reg3Index])
-        console.log("reg4",result[reg4Index])
-        console.log("result",result)
-      if (result[reg1Index]){ //第一种语句：几分钟前、三小时后
-        value1 = this.cn2num(result[reg1Index+1])
-        half=result[reg1Index+2]?0.5:0
-        value1=value1+half
-        value2=this.cn2num(result[reg1Index+4])
-        unit1=this.translateUnit(result[reg1Index+3])
-        unit2=this.translateUnit(result[reg1Index+5])
-        if (value2==0.5 && !unit2){ //两天半
-          unit2=unit1
-        }
-        direct = result[reg1Index+6]
-        if (direct=="前"){
-          temp = moment().utcOffset(8).subtract(value1,unit1).subtract(value2,unit2)
-          console.log("?????",value1,unit1,value2,unit2,temp.toDate())
-        }else{
-          temp = moment().utcOffset(8).add(value1,unit1).add(value2,unit2)
-        }
-        if (unit1=="years"){
-          temp = temp.startOf("years")
-        }else if (unit1=="months"){
-          temp = temp.startOf("months")
-        }else if (unit1=="days"){
-          temp = temp.startOf("days")
-        }else if (unit1=="hours"){
-          //两小时前不应被认为是去掉分钟数的时间
-          //temp = temp.startOf("hours")
-        }else if (unit1=="minutes"){
-          temp = temp.startOf("minutes")
-        }
-
-        console.log("new time:",temp.format("YYYY.MM.DD HH:mm:ss"))
-        console.log("acc",unit1,unit2)
-        console.log("reg1Index+8",result[reg1Index+8])
-        console.log("reg1Index+10",result[reg1Index+10],result[reg1Index+11],temp.month())
-        console.log("reg1Index+13",result[reg1Index+13],result[reg1Index+14],temp.date())
-
-        
-        /*
-        toSetDate = this.setDate([temp.year(),undefined], //year
-                                 result[reg1Index+8],     //holiday
-                                 [result[reg1Index+10]?result[reg1Index+10]:(unit1=="months"?temp.month()+1:undefined),result[reg1Index+11]], //月
-                                 [result[reg1Index+13]?result[reg1Index+13]:(unit1=="days"?temp.date():undefined),result[reg1Index+14]]) //日
-        toSetTime = this.setTime(result[reg1Index+15], //seg
-                                 result[reg1Index+17]?result[reg1Index+17]:(unit1=="hours"?temp.hour():undefined), //hour
-                                 result[reg1Index+19]?result[reg1Index+19]:(unit1=="minutes"?temp.minute():undefined)) //minutes
-        */
-        toSetDate = this.setDate([temp.year(),undefined], //year
-                                 result[reg1Index+8],     //holiday
-                                [result[reg1Index+10]?result[reg1Index+10]:(temp.month()+1),result[reg1Index+11]], //月
-                                [result[reg1Index+13]?result[reg1Index+13]:(temp.date()),result[reg1Index+14]]) //日
-        toSetTime = this.setTime(result[reg1Index+15], //seg
-                                result[reg1Index+17]?result[reg1Index+17]:(temp.hour()), //hour
-                                result[reg1Index+19]?result[reg1Index+19]:(temp.minute())) //minutes
-        console.log("date,time",toSetDate,toSetTime)
-        
-        result = moment().utcOffset(8).set(toSetDate).set(toSetTime).toDate()
-        return {datetime:this.nowE8(result.getTime()),acc:toSetTime.acc||toSetDate.acc||unit1}
+    result = text.match(new RegExp(`${this.dateExp1}`))
+    if (result&&result[0]){ //第一种语句：几分钟前、三小时后
+      console.log("reg1",result)
+      value1 = this.cn2num(result[2])
+      half=result[3]?0.5:0
+      value1=value1+half
+      value2=this.cn2num(result[5])
+      unit1=this.translateUnit(result[4])
+      unit2=this.translateUnit(result[6])
+      if (value2==0.5 && !unit2){ //两天半
+        unit2=unit1
       }
+      direct = result[7]
+      if (direct=="前"){
+        temp = moment().utcOffset(8).subtract(value1,unit1).subtract(value2,unit2)
+        console.log("?????",value1,unit1,value2,unit2,temp.toDate())
+      }else{
+        temp = moment().utcOffset(8).add(value1,unit1).add(value2,unit2)
+      }
+      if (unit1=="years"){
+        temp = temp.startOf("years")
+      }else if (unit1=="months"){
+        temp = temp.startOf("months")
+      }else if (unit1=="days"){
+        temp = temp.startOf("days")
+      }else if (unit1=="hours"){
+        //两小时前不应被认为是去掉分钟数的时间
+        //temp = temp.startOf("hours")
+      }else if (unit1=="minutes"){
+        temp = temp.startOf("minutes")
+      }
+
+      console.log("new time:",temp.format("YYYY.MM.DD HH:mm:ss"))
+      console.log("acc",unit1,unit2)
+      console.log("reg1Index+8",result[9])
+      console.log("reg1Index+10",result[11],result[12],temp.month())
+      console.log("reg1Index+13",result[14],result[15],temp.date())
+
       
-      if (result[reg2Index]){ //第二种语句：上个礼拜五下午3点、下个周末早上9点
-        direct = result[reg2Index+1]
-        unit = result[reg2Index+2]
-        if (["上","前"].includes(direct)){
-          value = this.cn2day(result[reg2Index+3],-1)
-        }else if (["下","后"].includes(direct)){
-          value = this.cn2day(result[reg2Index+3],1)
-        }else{
-          value = this.cn2day(result[reg2Index+3],0)
-        }
-        toSetTime=this.setTime(result[reg2Index+4],
-                               result[reg2Index+6],
-                               result[reg2Index+7])
-        
-        console.log(value,unit,direct,toSetTime)
-        
-        result = moment().utcOffset(8).startOf("week").set(toSetTime).add(value,"days").toDate()
-        return {datetime:this.nowE8(result.getTime()),acc:toSetTime.acc||"days"}
+      /*
+      toSetDate = this.setDate([temp.year(),undefined], //year
+                                result[reg1Index+8],     //holiday
+                                [result[reg1Index+10]?result[reg1Index+10]:(unit1=="months"?temp.month()+1:undefined),result[reg1Index+11]], //月
+                                [result[reg1Index+13]?result[reg1Index+13]:(unit1=="days"?temp.date():undefined),result[reg1Index+14]]) //日
+      toSetTime = this.setTime(result[reg1Index+15], //seg
+                                result[reg1Index+17]?result[reg1Index+17]:(unit1=="hours"?temp.hour():undefined), //hour
+                                result[reg1Index+19]?result[reg1Index+19]:(unit1=="minutes"?temp.minute():undefined)) //minutes
+      */
+      toSetDate = this.setDate([temp.year(),undefined], //year
+                                result[9],     //holiday
+                              [result[11]?result[11]:(temp.month()+1),result[12]], //月
+                              [result[14]?result[14]:(temp.date()),result[15]]) //日
+      toSetTime = this.setTime(result[16], //seg
+                              result[18]?result[18]:(temp.hour()), //hour
+                              result[20]?result[20]:(temp.minute())) //minutes
+      console.log("date,time",toSetDate,toSetTime)
+      
+      result = moment().utcOffset(8).set(toSetDate).set(toSetTime).toDate()
+      return {datetime:this.nowE8(result.getTime()),acc:toSetTime.acc||toSetDate.acc||unit1}
+    }
+  
+    result = text.match(new RegExp(`${this.dateExp2}`))
+    if (result&&result[0]){ //第二种语句：上个礼拜五下午3点、下个周末早上9点
+      console.log("reg2",result)
+      direct = result[2]
+      unit = result[3]
+      if (["上","前"].includes(direct)){
+        value = this.cn2day(result[4],-1)
+      }else if (["下","后"].includes(direct)){
+        value = this.cn2day(result[4],1)
+      }else{
+        value = this.cn2day(result[4],0)
       }
+      toSetTime=this.setTime(result[5],
+                              result[7],
+                              result[8])
+      
+      console.log(value,unit,direct,toSetTime)
+      
+      result = moment().utcOffset(8).startOf("week").set(toSetTime).add(value,"days").toDate()
+      return {datetime:this.nowE8(result.getTime()),acc:toSetTime.acc||"days"}
+    }
+    
+    result = text.match(new RegExp(`${this.dateExp3}`))
+    if (result&&result[0]){ // 第三种语句：2020年11月5日7点半
+      console.log("reg3",result)
+      toSetDate = this.setDate([result[3],
+                                result[4]],
+                               result[6], 
+                               [result[8],
+                                result[9]],
+                               [result[11],
+                                result[12]])
+      toSetTime = this.setTime(result[13],
+                               result[15],
+                               result[17])
+      console.log("date,time3",toSetDate,toSetTime)
+      result = moment().utcOffset(8).set(toSetDate).set(toSetTime).toDate()
+      console.log("result3",result,toSetTime.acc||toSetDate.acc)
+      return {datetime:this.nowE8(result.getTime()),acc:toSetTime.acc||toSetDate.acc}
+    }
 
-      if (result[reg3Index]){ // 第三种语句：2020年11月5日7点半
-        toSetDate = this.setDate([result[reg3Index+2],
-                                  result[reg3Index+3]],
-                                 result[reg3Index+5], 
-                                 [result[reg3Index+7],
-                                  result[reg3Index+8]],
-                                 [result[reg3Index+10],
-                                  result[reg3Index+11]])
-        toSetTime = this.setTime(result[reg3Index+12],
-                                 result[reg3Index+14],
-                                 result[reg3Index+16])
-        console.log("date,time3",toSetDate,toSetTime)
-        result = moment().utcOffset(8).set(toSetDate).set(toSetTime).toDate()
-        console.log("result3",result,toSetTime.acc||toSetDate.acc)
-        return {datetime:this.nowE8(result.getTime()),acc:toSetTime.acc||toSetDate.acc}
-      }
-
-      if (result[reg4Index]){ // 第四种语句：最近这3个月、这两个季度
-        temp = result[reg4Index+1]
-        value = result[reg4Index+2]
-        unit = this.translateUnit(result[reg4Index+3])
-        if (!value) value="1"
-        value=this.cn2num(value)
-        console.log(temp,value,unit)
-        let start,end,base
-        if (temp=="上"){
-           end = this.nowE8(moment().utcOffset(8).toDate().getTime())
-           base = moment().utcOffset(8).startOf(unit).subtract(1,unit)
-           start = this.nowE8(base.subtract(value - 1,unit).toDate().getTime())         
-        }else if (temp=="接下来这"||temp=="接下来"||temp=="下"){
-           start = this.nowE8(moment().utcOffset(8).toDate().getTime())
-           base = moment().utcOffset(8).endOf(unit).add(1,unit)
-           end = this.nowE8(base.add(value - 1,unit).toDate().getTime())         
-        }else{
-          end = this.nowE8(moment().utcOffset(8).toDate().getTime())
+    result = text.match(new RegExp(`${this.dateExp4}`))
+    if (result&&result[0]){ // 第四种语句：最近这3个月、这两个季度
+      console.log("reg4",result)
+      temp = result[2]
+      value = result[3]
+      unit = this.translateUnit(result[4])
+      if (!value) value="1"
+      value=this.cn2num(value)
+      console.log(temp,value,unit)
+      let start,end,base
+      if (temp=="上"||temp=="过去"){
           base = moment().utcOffset(8).startOf(unit)
-          start = this.nowE8(base.subtract(value - 1,unit).toDate().getTime())         
-       }
-        console.log("reg4 result",result) 
-        return  {sDatetime:start,eDatetime:end,acc:unit}    
+          end = this.nowE8(base.toDate().getTime())
+          start = this.nowE8(base.subtract(value,unit).toDate().getTime())         
+      }else if (temp=="接下来这"||temp=="接下来"||temp=="下"){
+          start = this.nowE8(moment().utcOffset(8).toDate().getTime())
+          base = moment().utcOffset(8).endOf(unit).add(1,unit)
+          end = this.nowE8(base.add(value - 1,unit).toDate().getTime())         
+      }else{
+        end = this.nowE8(moment().utcOffset(8).toDate().getTime())
+        base = moment().utcOffset(8).startOf(unit)
+        start = this.nowE8(base.subtract(value - 1,unit).toDate().getTime())         
       }
-    }else{
-      return null
+      return  {sDatetime:start,eDatetime:end,acc:unit}    
     }
   }
   parseDuration(text){

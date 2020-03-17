@@ -219,11 +219,11 @@ app.post("/food/analyse/",(req,res)=>{
   let option={}
   let energyKj=[],fatG=[],chG=[],proteinG=[],sodiumMg=[]
   
-  energyKj = _.chain(data).map(x=>{return [x.eDate.substr(5)+"\n"+x.eTime.substr(0,5),x.nutrition.energyKj[0],x.nutrition.energyKj[1]]}).value()
-  proteinG = _.chain(data).map(x=>{return [x.eDate.substr(5)+"\n"+x.eTime.substr(0,5),x.nutrition.proteinG[0],x.nutrition.proteinG[1]]}).value()
-  fatG = _.chain(data).map(x=>{return [x.eDate.substr(5)+"\n"+x.eTime.substr(0,5),x.nutrition.fatG[0],x.nutrition.fatG[1]]}).value()
-  chG = _.chain(data).map(x=>{return [x.eDate.substr(5)+"\n"+x.eTime.substr(0,5),x.nutrition.chG[0],x.nutrition.chG[1]]}).value()
-  sodiumMg = _.chain(data).map(x=>{return [x.eDate.substr(5)+"\n"+x.eTime.substr(0,5),x.nutrition.sodiumMg[0],x.nutrition.sodiumMg[1]]}).value()
+  energyKj = _.chain(data).map(x=>{return [x.eDate.substr(5)+"\n"+x.eTime.substr(0,5),x.nutrition.energyKj?x.nutrition.energyKj[0]:0,x.nutrition.energyKj?x.nutrition.energyKj[1]:0]}).value()
+  proteinG = _.chain(data).map(x=>{return [x.eDate.substr(5)+"\n"+x.eTime.substr(0,5),x.nutrition.proteinG?x.nutrition.proteinG[0]:0,x.nutrition.proteinG?x.nutrition.proteinG[1]:0]}).value()
+  fatG = _.chain(data).map(x=>{return [x.eDate.substr(5)+"\n"+x.eTime.substr(0,5),x.nutrition.fatG?x.nutrition.fatG[0]:0,x.nutrition.fatG?x.nutrition.fatG[1]:0]}).value()
+  chG = _.chain(data).map(x=>{return [x.eDate.substr(5)+"\n"+x.eTime.substr(0,5),x.nutrition.chG?x.nutrition.chG[0]:0,x.nutrition.chG?x.nutrition.chG[1]:0]}).value()
+  sodiumMg = _.chain(data).map(x=>{return [x.eDate.substr(5)+"\n"+x.eTime.substr(0,5),x.nutrition.sodiumMg?x.nutrition.sodiumMg[0]:0,x.nutrition.sodiumMg?x.nutrition.sodiumMg[1]:0]}).value()
   let sumEnergyKj,overEnergyKj
   if (energyKj.length!=0){
     sumEnergyKj = energyKj.map(x=>x[1]).reduce((x,y)=>x+y)
